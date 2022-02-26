@@ -1,0 +1,11 @@
+{
+  "name": "woodnstone_next",
+  "version": "0.0.1",
+  "description": "Project for a Webshop selling handmade products based on natural materials.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kevin Kötz (https://github.com/KevinKoetz)",
+  "license": "MIT"
+}
