@@ -2,10 +2,44 @@
   "name": "woodnstone_next",
   "version": "0.0.1",
   "description": "Project for a Webshop selling handmade products based on natural materials.",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preinstall": "node scripts/preinstall.mjs",
+    "start": "concurrently npm:start:frontend npm:start:backend npm:start:admin",
+    "start:frontend": "npm run dev -w frontend",
+    "start:backend": "npm run start -w backend",
+    "start:admin": "npm run start -w admin",
+    "prettier": "prettier --write **/*.{js,ts,css,scss,jsx,tsx}"
   },
   "author": "Kevin Kötz (https://github.com/KevinKoetz)",
-  "license": "MIT"
+  "workspaces": [
+    "frontend",
+    "backend",
+    "admin"
+  ],
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.4",
+    "prettier": "^2.5.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "**/*.{js,ts,css,scss,jsx,tsx}": [
+        "prettier --write",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "node_modules",
+      "dist",
+      "package-lock.json",
+      ".next",
+      "build"
+    ]
+  }
 }
