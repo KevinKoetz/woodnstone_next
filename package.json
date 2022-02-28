@@ -41,5 +41,9 @@
       ".next",
       "build"
     ]
+  },
+  "dependencies": {
+    "admin": "file:admin",
+    "react-switch": "^6.0.0"
   }
 }
