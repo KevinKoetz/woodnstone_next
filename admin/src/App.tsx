@@ -1,12 +1,14 @@
-import React from "react";
 import "./App.css";
-
-
+import Layout from "./Components/Layout/Layout";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import Switch from "react-switch";
 function App() {
   return (
-    <div className="App">
-      Admin App should be here.
-    </div>
+    <Router>
+      <div className="App">
+        <Layout />
+      </div>
+    </Router>
   );
 }
 
