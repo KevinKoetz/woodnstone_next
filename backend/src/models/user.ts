@@ -1,6 +1,7 @@
 import { Schema, model, Model, Document, Query } from "mongoose";
 import crypto from "crypto";
 import { User } from "../../../types";
+import mongoose from "mongoose";
 
 const keyLength = 16;
 const hashLength = 64;
@@ -11,10 +12,15 @@ interface InstanceMethods {
 }
 
 interface QueryHelpers {
-  byEmail(name: string): Query<Omit<User, "password"> | null, Document<User>> & QueryHelpers;
+  byEmail(
+    name: string
+  ): Query<Omit<User, "password"> | null, Document<User>> & QueryHelpers;
 }
 
-const userSchema = new Schema<User, Model<Omit<User, "password">, QueryHelpers, InstanceMethods>>({
+const userSchema = new Schema<
+  User,
+  Model<Omit<User, "password">, QueryHelpers, InstanceMethods>
+>({
   email: {
     type: String,
     required: true,
@@ -25,9 +31,9 @@ const userSchema = new Schema<User, Model<Omit<User, "password">, QueryHelpers, 
     set: toLowerCase,
   },
   password: {
-    type: Buffer,
-    required: true,
-    select: false,
+    hash: { type: Buffer, required: true, select: false },
+    salt: { type: Buffer, required: true, select: false },
+    select: false
   },
   role: {
     type: String,
@@ -43,8 +49,8 @@ userSchema.methods.setPassword = async function (password: string) {
 
     crypto.scrypt(password, salt, hashLength, (err, derivedKey) => {
       if (err) rej(err);
-      const password = Buffer.concat([salt, derivedKey]);
-      this.password = password;
+      this.password.salt = salt;
+      this.password.hash = derivedKey;
       res();
     });
   });
@@ -52,11 +58,10 @@ userSchema.methods.setPassword = async function (password: string) {
 
 userSchema.methods.verifyPassword = async function (password: string) {
   return new Promise<boolean>((res, rej) => {
-    const salt = this.password.slice(0, keyLength);
-    const key = this.password.slice(keyLength, keyLength + hashLength);
+    const {salt, hash} = this.password
     crypto.scrypt(password, salt, 64, (err, derivedKey) => {
       if (err) rej(err);
-      res(derivedKey.equals(key));
+      res(derivedKey.equals(hash));
     });
   });
 };
@@ -69,7 +74,7 @@ function toLowerCase(v: string) {
   return v.toLowerCase();
 }
 
-export default model<User, Model<Omit<User, "password">, QueryHelpers, InstanceMethods>>(
-  "user",
-  userSchema
-);
+export default model<
+  User,
+  Model<Omit<User, "password">, QueryHelpers, InstanceMethods>
+>("user", userSchema);

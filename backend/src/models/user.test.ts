@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import User from "./user";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import exp from "constants";
 
 (async () => {
   let mongo: MongoMemoryServer;
@@ -97,7 +96,7 @@ import exp from "constants";
   });
 
   describe("User Model should require a", () => {
-    test("password", async () => {
+    test("password.hash", async () => {
       let err;
       try {
         await User.validate({});
@@ -105,7 +104,18 @@ import exp from "constants";
         err = error;
       }
       expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(Object.keys(err.errors)).toContain("password");
+      expect(Object.keys(err.errors)).toContain("password.hash");
+    });
+
+    test("password.salt", async () => {
+      let err;
+      try {
+        await User.validate({});
+      } catch (error: any) {
+        err = error;
+      }
+      expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(Object.keys(err.errors)).toContain("password.salt");
     });
 
     test("email", async () => {
@@ -210,17 +220,19 @@ import exp from "constants";
       await user.setPassword("1234");
       const password = (user as any).password;
       expect(password).not.toBe("1234");
-      expect(password).toBeInstanceOf(Buffer);
       expect(password.toString()).not.toBe("1234");
+      expect(password).toBeInstanceOf(Object);
+      expect(password.salt).toBeInstanceOf(Buffer)
+      expect(password.hash).toBeInstanceOf(Buffer)
+      expect(password.salt.toString()).not.toBe("1234");
+      expect(password.hash.toString()).not.toBe("1234");
     });
 
     test("using a 16 byte salt and 64 byte hash", async () => {
       const user = new User({ email: "kevin@example.com", role: "root" });
       await user.setPassword("1234");
       const password = (user as any).password;
-      expect(password.length).toBe(16 + 64);
-      const salt = password.slice(0, 16);
-      const hash = password.slice(16, 16 + 64);
+      const {salt, hash} = password
       expect(salt.length).toBe(16);
       expect(hash.length).toBe(64);
     });
@@ -242,7 +254,8 @@ import exp from "constants";
       await user.setPassword("1234");
       await user.save();
       const userFromDb = await User.find().byEmail("kevin@example.com").exec();
-      expect((userFromDb as any).password).toBe(undefined);
+      expect((userFromDb as any).password.hash).toBe(undefined);
+      expect((userFromDb as any).password.salt).toBe(undefined);
     });
   });
 
