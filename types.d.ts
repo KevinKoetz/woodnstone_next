@@ -1,16 +1,16 @@
-import type { ObjectId } from "mongoose";
+import type { Types} from "mongoose";
 
 //All keys are required except there is a ? after the key.
 
 interface User {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   email: string; //unique
   password: string;
   role: Role;
 }
 
 interface Product {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   name: string; //unique
   description: string;
   startingPrice: number; //Prices to be stored in euro-cents (no comma values)
@@ -19,7 +19,7 @@ interface Product {
 }
 
 interface Reference {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   name: string; //unique
   description?: string;
   sections?: Section[];
@@ -35,7 +35,7 @@ declare namespace Reference {
 }
 
 interface Page {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   name: string; //unique
   variables: { [key: string]: unknown };
 }
@@ -53,13 +53,13 @@ namespace Page {
 }
 
 interface Order {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   email: string;
   status: OrderStatus;
   dueDate: Date;
   shippingAddress: Address;
   invoiceAddress?: Address;
-  products: ObjectId[];
+  products: Types.ObjectId[];
 }
 
 interface Address {
