@@ -1,7 +1,6 @@
 import { Schema, model, Model, Document, Query } from "mongoose";
 import crypto from "crypto";
 import { User } from "../../../types";
-import mongoose from "mongoose";
 
 const keyLength = 16;
 const hashLength = 64;
@@ -59,7 +58,7 @@ userSchema.methods.setPassword = async function (password: string) {
 userSchema.methods.verifyPassword = async function (password: string) {
   return new Promise<boolean>((res, rej) => {
     const {salt, hash} = this.password
-    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+    crypto.scrypt(password, salt, hashLength, (err, derivedKey) => {
       if (err) rej(err);
       res(derivedKey.equals(hash));
     });
