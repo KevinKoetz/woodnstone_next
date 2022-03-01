@@ -3,9 +3,8 @@ import type { Types} from "mongoose";
 //All keys are required except there is a ? after the key.
 
 interface User {
-  _id: Types.ObjectId;
   email: string; //unique
-  password: string;
+  password: Buffer; //Buffer because: https://nodejs.org/dist/latest-v16.x/docs/api/crypto.html#using-strings-as-inputs-to-cryptographic-apis
   role: Role;
 }
 
