@@ -1,9 +1,14 @@
-import { Schema, model, Model, Document, Query } from "mongoose";
+import { Schema, model, Model, Document, Query, Types } from "mongoose";
 import crypto from "crypto";
 import { User } from "../../../types";
 
 const keyLength = 16;
 const hashLength = 64;
+const scryptOptions = {
+  N: 16384,
+  r: 8,
+  p: 4
+}
 
 interface InstanceMethods {
   setPassword: (password: string) => Promise<void>;
@@ -11,9 +16,15 @@ interface InstanceMethods {
 }
 
 interface QueryHelpers {
-  byEmail(
-    name: string
-  ): Query<Omit<User, "password"> | null, Document<User>> & QueryHelpers;
+  byEmail(name: string): Query<
+    | (Document<unknown, any, Omit<User, "password">> &
+        Omit<User, "password"> & {
+          _id: Types.ObjectId;
+        } & InstanceMethods)
+    | null,
+    Document<User>
+  > &
+    QueryHelpers;
 }
 
 const userSchema = new Schema<
@@ -32,7 +43,7 @@ const userSchema = new Schema<
   password: {
     hash: { type: Buffer, required: true, select: false },
     salt: { type: Buffer, required: true, select: false },
-    select: false
+    select: false,
   },
   role: {
     type: String,
@@ -46,22 +57,34 @@ userSchema.methods.setPassword = async function (password: string) {
     // generate random 16 bytes long salt
     const salt = crypto.randomBytes(keyLength);
 
-    crypto.scrypt(password, salt, hashLength, (err, derivedKey) => {
-      if (err) rej(err);
-      this.password.salt = salt;
-      this.password.hash = derivedKey;
-      res();
-    });
+    crypto.scrypt(
+      password,
+      salt,
+      hashLength,
+      scryptOptions,
+      (err, derivedKey) => {
+        if (err) rej(err);
+        this.password.salt = salt;
+        this.password.hash = derivedKey;
+        res();
+      }
+    );
   });
 };
 
 userSchema.methods.verifyPassword = async function (password: string) {
   return new Promise<boolean>((res, rej) => {
-    const {salt, hash} = this.password
-    crypto.scrypt(password, salt, hashLength, (err, derivedKey) => {
-      if (err) rej(err);
-      res(derivedKey.equals(hash));
-    });
+    const { salt, hash } = this.password;
+    crypto.scrypt(
+      password,
+      salt,
+      hashLength,
+      scryptOptions,
+      (err, derivedKey) => {
+        if (err) rej(err);
+        res(derivedKey.equals(hash));
+      }
+    );
   });
 };
 
