@@ -10,7 +10,7 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { Routes, useNavigate, Route } from "react-router-dom";
+import { Routes, useNavigate, Route, Outlet } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -123,13 +123,7 @@ export default function Layout() {
       >
         <Toolbar />
 
-        <Routes>
-          <Route path="/" element={<div>Orders</div>} />
-          <Route path="/products" element={<div>Products</div>} />
-          <Route path="/references" element={<div>References</div>} />
-          <Route path="/pages" element={<div> Pages </div>} />
-          <Route path="/users" element={<div> Users </div>} />
-        </Routes>
+      <Outlet />
       </Box>
     </Box>
   );
