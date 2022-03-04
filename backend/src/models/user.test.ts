@@ -5,7 +5,7 @@ import { performance } from "perf_hooks";
 
 let mongo: MongoMemoryServer;
 
-jest.setTimeout(20000)
+jest.setTimeout(20000);
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create();
@@ -208,9 +208,7 @@ describe("User Models role should accept a", () => {
 
 describe("User Model should secure the password by", () => {
   async function verifyPasswordApi(email: string, password: string) {
-    const user = await User.find().byEmail(email).select("password").exec();
-    if (!user) return false;
-    return await user.verifyPassword(password);
+    return User.verifyPassword(email, password);
   }
 
   test("having a instance Method to set the password", () => {
@@ -227,26 +225,32 @@ describe("User Model should secure the password by", () => {
     await user.setPassword("123456");
     await user.save();
 
-    const startAvailable = performance.now()
-    for (let iteration = 0; iteration < 100; iteration++) {
-      await verifyPasswordApi("kevin@example.com", "123456")
+    const startAvailable = performance.now();
+    for (let iteration = 0; iteration < 20; iteration++) {
+      await verifyPasswordApi("kevin@example.com", "123456");
     }
-    const endAvailable = performance.now()
-    const startUnavailable = performance.now()
-    for (let iteration = 0; iteration < 100; iteration++) {
-      await verifyPasswordApi("notthere@example.com", "123456")
+    const endAvailable = performance.now();
+    const startUnavailable = performance.now();
+    for (let iteration = 0; iteration < 20; iteration++) {
+      await verifyPasswordApi("notthere@example.com", "123456");
     }
-    const endUnavailable = performance.now()
+    const endUnavailable = performance.now();
 
-    const availableTime = endAvailable - startAvailable
-    const unavailableTime = endUnavailable - startUnavailable
+    const availableTime = endAvailable - startAvailable;
+    const unavailableTime = endUnavailable - startUnavailable;
+
+    const midPoint = (availableTime + unavailableTime) / 2;
+    const minDeviation = midPoint - midPoint * 0.1;
+    const maxDeviation = midPoint + midPoint * 0.1;
+    console.log(availableTime);
+    console.log(unavailableTime);
     
-    const midPoint = (availableTime + unavailableTime)/2
-    const minDeviation = midPoint - (midPoint * 0.1)
-    const maxDeviation = midPoint + (midPoint * 0.1)
-    expect(availableTime <= maxDeviation && availableTime >= minDeviation).toBe(true)
-    expect(unavailableTime <= maxDeviation && unavailableTime >= minDeviation).toBe(true)
-
+    expect(availableTime <= maxDeviation && availableTime >= minDeviation).toBe(
+      true
+    );
+    expect(
+      unavailableTime <= maxDeviation && unavailableTime >= minDeviation
+    ).toBe(true);
   });
 
   test("storing it hashed", async () => {
@@ -274,13 +278,15 @@ describe("User Model should secure the password by", () => {
   test("letting the verify function return true for correct passwords", async () => {
     const user = new User({ email: "kevin@example.com", role: "root" });
     await user.setPassword("1234");
-    expect(await user.verifyPassword("1234")).toBe(true);
+    await user.save()
+    expect(await User.verifyPassword("kevin@example.com","1234")).toBe(true);
   });
 
   test("letting the verify function return false for incorrect passwords", async () => {
     const user = new User({ email: "kevin@example.com", role: "root" });
     await user.setPassword("1234");
-    expect(await user.verifyPassword("password")).toBe(false);
+    await user.save()
+    expect(await User.verifyPassword("kevin@example.com","password")).toBe(false);
   });
 
   test("not selecting it when user is querried", async () => {
