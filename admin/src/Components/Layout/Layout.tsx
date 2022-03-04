@@ -18,16 +18,10 @@ import { Routes, useNavigate, Route, Outlet } from "react-router-dom";
 
 const drawerWidth = 240;
 
-interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window?: () => Window;
-}
 
-export default function LayoutB(props: Props) {
-  const { window } = props;
+
+export default function LayoutB() {
+  
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
@@ -63,8 +57,8 @@ export default function LayoutB(props: Props) {
     </div>
   );
 
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
+  
+    
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -98,7 +92,7 @@ export default function LayoutB(props: Props) {
       >
         {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
-          container={container}
+          
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
