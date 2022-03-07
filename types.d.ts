@@ -18,6 +18,7 @@ interface Product {
   startingPrice: number; //Prices to be stored in euro-cents (no comma values)
   stock: number;
   maxOrderAmount: number;
+  images: string[]
 }
 
 interface Reference {

@@ -275,18 +275,21 @@ describe("User Model should secure the password by", () => {
     expect(hash.length).toBe(64);
   });
 
-  test("letting the verify function return true for correct passwords", async () => {
+  test("letting the verify function return the User without the password key for correct passwords", async () => {
     const user = new User({ email: "kevin@example.com", role: "root" });
     await user.setPassword("1234");
     await user.save()
-    expect(await User.verifyPassword("kevin@example.com","1234")).toBe(true);
+    const verifiedUser = await User.verifyPassword("kevin@example.com","1234")
+    expect(verifiedUser).toMatchObject({email: "kevin@example.com", role: "root"})
+    expect((verifiedUser as any).password).toBe(undefined)
+    
   });
 
-  test("letting the verify function return false for incorrect passwords", async () => {
+  test("letting the verify function return null for incorrect passwords", async () => {
     const user = new User({ email: "kevin@example.com", role: "root" });
     await user.setPassword("1234");
     await user.save()
-    expect(await User.verifyPassword("kevin@example.com","password")).toBe(false);
+    expect(await User.verifyPassword("kevin@example.com","password")).toBe(null);
   });
 
   test("not selecting it when user is querried", async () => {
