@@ -5,6 +5,10 @@
   "scripts": {
     "preinstall": "node scripts/preinstall.mjs",
     "start": "concurrently npm:start:frontend npm:start:backend npm:start:admin",
+    "test": "concurrently npm:test:frontend npm:test:backend npm:test:admin",
+    "test:admin": "npm run test -w admin",
+    "test:backend": "npm run test -w backend",
+    "test:frontend": "npm run test -w frontend",
     "start:frontend": "npm run dev -w frontend",
     "start:backend": "npm run start -w backend",
     "start:admin": "npm run start -w admin",
