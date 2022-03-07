@@ -11,45 +11,51 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { Routes, useNavigate, Route, Outlet } from "react-router-dom";
+import { useState } from "react";
+
 
 const drawerWidth = 240;
 
 export default function Layout() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const navigate = useNavigate();
+
+  const [header, setHeader] = useState('Orders')
+  
+  
   const drawer = (
     <div>
       <Toolbar />
 
       <List>
-        <ListItem button onClick={() => navigate("/")}>
+        <ListItem button onClick={() =>{ setMobileOpen(!mobileOpen); navigate("/"); setHeader('Orders')}}>
           <ListItemText primary="Orders" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/products")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen) ;navigate("/products"); setHeader('Poducts')}}>
           <ListItemText primary="Products" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/references")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/references"); setHeader('References')}}>
           <ListItemText primary="References" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/pages")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/pages"); setHeader('Pages')} }>
           <ListItemText primary="Pages" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/users")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/users"); setHeader('Users')}}>
           <ListItemText primary="Users" />
         </ListItem>
       </List>
     </div>
   );
-
+ 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -71,7 +77,7 @@ export default function Layout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Responsive drawer
+            {header}
           </Typography>
         </Toolbar>
       </AppBar>
