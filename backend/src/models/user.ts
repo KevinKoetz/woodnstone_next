@@ -1,4 +1,12 @@
-import { Schema, model, Model, Document, Query, Types } from "mongoose";
+import {
+  Schema,
+  model,
+  Model,
+  Document,
+  Query,
+  Types,
+  LeanDocument,
+} from "mongoose";
 import crypto from "crypto";
 import { User } from "../../../types";
 
@@ -10,8 +18,16 @@ const scryptOptions = {
   p: 4,
 };
 
-const fakeSalt = crypto.randomBytes(keyLength)
-const fakePassword = {salt: fakeSalt, hash: crypto.scryptSync("PjbEX,4v{jq<7J7V", fakeSalt, hashLength,scryptOptions)}
+const fakeSalt = crypto.randomBytes(keyLength);
+const fakePassword = {
+  salt: fakeSalt,
+  hash: crypto.scryptSync(
+    "PjbEX,4v{jq<7J7V",
+    fakeSalt,
+    hashLength,
+    scryptOptions
+  ),
+};
 
 interface InstanceMethods {
   setPassword: (password: string) => Promise<void>;
@@ -31,7 +47,15 @@ interface QueryHelpers {
 
 interface UserModel
   extends Model<Omit<User, "password">, QueryHelpers, InstanceMethods> {
-  verifyPassword(email: string, password: string): boolean;
+  verifyPassword(
+    email: string,
+    password: string
+  ): Promise<LeanDocument<
+    Document<unknown, any, Omit<User, "password">> &
+      Omit<User, "password"> & {
+        _id: Types.ObjectId;
+      } & InstanceMethods
+  > | null>;
 }
 
 const userSchema = new Schema<User, UserModel>({
@@ -47,7 +71,6 @@ const userSchema = new Schema<User, UserModel>({
   password: {
     hash: { type: Buffer, required: true, select: false },
     salt: { type: Buffer, required: true, select: false },
-    select: false,
   },
   role: {
     type: String,
@@ -86,17 +109,26 @@ userSchema.static(
     const user = await model<User, UserModel>("user", userSchema)
       .find()
       .byEmail(email)
-      .select("password");
-    const {salt, hash} = user ? (user as any).password : fakePassword;
-    return new Promise<boolean>((res, rej) => {
+      .select("+password.hash +password.salt");
+    const { salt, hash } = user ? (user as any).password : fakePassword;
+    return new Promise<LeanDocument<
+      Document<unknown, any, Omit<User, "password">> &
+        Omit<User, "password"> & {
+          _id: Types.ObjectId;
+        } & InstanceMethods
+    > | null>((res, rej) => {
       crypto.scrypt(
         password,
         salt,
         hashLength,
         scryptOptions,
         (err, derivedKey) => {
-          if (err) rej(err);
-          res(derivedKey.equals(hash));
+          const check = derivedKey.equals(hash);
+          if (err) return rej(err)
+          if(!user || !check) return res(null);
+          const result = user.toObject();
+          (result as any).password = undefined;
+          res(result);
         }
       );
     });
