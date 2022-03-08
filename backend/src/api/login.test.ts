@@ -122,7 +122,11 @@ describe("the login route should", () => {
     });
   });
 
-  test("return a jwt when email and password are valid.", async () => {
+  
+});
+
+describe("The jwt should", () => {
+  test("expire in 15 min.", async () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
@@ -143,7 +147,52 @@ describe("the login route should", () => {
     if(typeof token === "string") throw new Error("Shouldn't be a string")
     expect(token.exp).toBeDefined()
     expect(token.iat).toBeDefined()
-    if(!token.exp || !token.iat) throw new Error("Should never happen.")
+    if(!token.exp || !token.iat) throw new Error("exp or iat not defined on token.")
     expect(token.exp - token.iat).toBe(900);
   });
-});
+
+  test("contain the user email and role.", async () => {
+    const address = server.address() as AddressInfo;
+    if (!address) throw new Error("Server should be running!");
+
+    const user = new User({ email: "kevin@example.com", role: "root" });
+    await user.setPassword("123456");
+    await user.save();
+
+    const response = await axios.post(
+      "http://localhost:" + address.port + "/login",
+      null,
+      {
+        auth: { username: "kevin@example.com", password: "123456" },
+        validateStatus: () => true,
+      }
+    );
+    expect(response.status).toBe(200);
+    const token = jwt.verify(response.data, "jwt_key")
+    if(typeof token === "string") throw new Error("Shouldn't be a string")
+    expect(token.email).toBeDefined()
+    expect(token.role).toBeDefined()
+  });
+
+  test("not contain the password", async () => {
+    const address = server.address() as AddressInfo;
+    if (!address) throw new Error("Server should be running!");
+
+    const user = new User({ email: "kevin@example.com", role: "root" });
+    await user.setPassword("123456");
+    await user.save();
+
+    const response = await axios.post(
+      "http://localhost:" + address.port + "/login",
+      null,
+      {
+        auth: { username: "kevin@example.com", password: "123456" },
+        validateStatus: () => true,
+      }
+    );
+    expect(response.status).toBe(200);
+    const token = jwt.verify(response.data, "jwt_key")
+    if(typeof token === "string") throw new Error("Shouldn't be a string")
+    expect(token.password).not.toBeDefined()
+  });
+})
