@@ -11,6 +11,13 @@ interface User {
   role: Role;
 }
 
+interface Token {
+  email: string,
+  role: Role,
+  iat: number,
+  exp: number
+}
+
 interface Product {
   _id: Types.ObjectId;
   name: string; //unique

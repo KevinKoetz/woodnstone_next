@@ -10,12 +10,15 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { Routes, useNavigate, Route, Outlet } from "react-router-dom";
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate,  Outlet } from "react-router-dom";
+import { useAuth } from "../Auth/Auth";
 
 const drawerWidth = 240;
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const {signOut} = useAuth()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -70,9 +73,12 @@ export default function Layout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
             Responsive drawer
           </Typography>
+          <IconButton onClick={signOut} color="inherit" edge="end" aria-label="logout">
+            <LogoutIcon/>
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Box
