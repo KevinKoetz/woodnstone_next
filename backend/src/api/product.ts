@@ -2,8 +2,6 @@ import express from "express";
 import Product from "../models/Product";
 
 const productRoute = express.Router();
-productRoute.use(express.json())
-productRoute.use(express.urlencoded({extended:true}))
 productRoute.post("/", async (req, res) => {
     console.log('body:', req.body)
     try {
@@ -12,7 +10,7 @@ productRoute.post("/", async (req, res) => {
         /* res.setHeader('Content-Type', 'application/json') */
         /* res.send(JSON.stringify(product)) */
         res.json(product)
-    } catch (error:any) {
+    } catch (error: any) {
         res.status(400)
         res.send(error.message)
     }
