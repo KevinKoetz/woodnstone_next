@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
 app.use(api);
-
+app.use(express.static("upload"))
 app.listen(PORT, () => {
   console.log("App listening on Port:", PORT);
 });

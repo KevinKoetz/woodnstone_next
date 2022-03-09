@@ -7,6 +7,11 @@ import passport from "passport";
 import productRoute from "./product";
 import { AddressInfo } from "net";
 import Product from "../models/Product";
+import { FormData, File } from "formdata-node";
+import { Buffer } from "buffer";
+import { FormDataEncoder } from "form-data-encoder";
+import { Readable } from "stream";
+import Path from "path";
 
 let mongo: MongoMemoryServer;
 let app: Express;
@@ -78,19 +83,29 @@ describe("the product route should", () => {
             description: "Holz",
             name: name,
             startingPrice: 100,
-            images: [""],
             stock: 10,
             maxOrderAmount: 50,
         };
-        const response = await axios.post(              // sending via post req
-            "http://localhost:" + address.port + "/product",
-            product
-        );
-        expect(response.data).toMatchObject(product)    //expecting the server to send product back
-        expect(response.data._id).toBeDefined()         // expecting id inside of response data 
 
-        const dbProduct = await Product.findById(response.data._id)
-        expect(dbProduct).toMatchObject(product)        //expecting to find product in DB
-        
+        const form = new FormData();
+        Object.entries(product).forEach((entry) => form.set(entry[0], entry[1]));
+        form.append("images", new File(["Hello"], "justAName"));
+        form.append("images", new File(["World"], "justAName"));
+       
+
+        const encoder = new FormDataEncoder(form);
+
+        const response = await axios.post(
+            // sending via post req
+            "http://localhost:" + address.port + "/product",
+            Readable.from(encoder.encode()),
+            { headers: encoder.headers }
+        );
+            throw new Error("implement me!")
+   /*      expect(response.data).toMatchObject(product); //expecting the server to send product back
+        expect(response.data._id).toBeDefined(); // expecting id inside of response data
+
+        const dbProduct = await Product.findById(response.data._id);
+        expect(dbProduct).toMatchObject(product); //expecting to find product in DB */
     });
 });
