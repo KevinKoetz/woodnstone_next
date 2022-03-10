@@ -14,7 +14,6 @@ import { FormData, File } from "formdata-node";
 import { Buffer } from "buffer";
 import { FormDataEncoder } from "form-data-encoder";
 import { Readable } from "stream";
-import Path from "path";
 
 let mongo: MongoMemoryServer;
 let app: Express;
@@ -79,77 +78,88 @@ describe("the product route should", () => {
   });
 
   test("create a new product after post request ", async () => {
-    const name = (Math.random() * 100).toString(); // defining product
     const product = {
       description: "Holz",
-      name: name,
+      name: "test",
       startingPrice: 100,
       stock: 10,
       maxOrderAmount: 50,
     };
 
-    const image1 = new File(
-      Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAOSURBVChTYxgFJAMGBgABNgABY8OiGAAAAABJRU5ErkJggg==",
-        "base64"
-      ),
-      "image1.png",
-      { type: "image/png" }
+    //10x10px black png image
+    const image1 = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAOSURBVChTYxgFJAMGBgABNgABY8OiGAAAAABJRU5ErkJggg==",
+      "base64"
     );
 
-    const image2 = new File(
-      Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYSURBVChTY/z//z8DbsAEpXGAkSnNwAAApeMDEUEua14AAAAASUVORK5CYII=",
-        "base64"
-      ),
-      "image2.png",
-      { type: "image/png" }
+    //10x10px white png image
+    const image2 = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYSURBVChTY/z//z8DbsAEpXGAkSnNwAAApeMDEUEua14AAAAASUVORK5CYII=",
+      "base64"
     );
 
     const form = new FormData();
+
+    //Adding all the entries to the form Data
     Object.entries(product).forEach((entry) => form.set(entry[0], entry[1]));
-    form.append("images", image1);
-    form.append("images", image2);
+
+
+    form.append("images", {
+      type: "image/png",
+      name: "image1.png",
+      [Symbol.toStringTag]: "File",
+      size: image1.length,
+      stream() {
+        return new Readable({
+          read() {
+            this.push(image1);
+            this.push(null);
+          },
+        });
+      },
+    });
+
+    form.append("images", {
+      type: "image/png",
+      name: "image2.png",
+      [Symbol.toStringTag]: "File",
+      size: image2.length,
+      stream() {
+        return new Readable({
+          read() {
+            this.push(image2);
+            this.push(null);
+          },
+        });
+      },
+    });
 
     const encoder = new FormDataEncoder(form);
 
-    try {
-      const response = await axios.post(
-        // sending via post req
-        "http://localhost:" + address.port + "/product",
-        Readable.from(encoder.encode()),
-        { headers: encoder.headers }
-      );
+    const response = await axios.post(
+      // sending via post req
+      "http://localhost:" + address.port + "/product",
+      Readable.from(encoder.encode()),
+      { headers: encoder.headers }
+    );
 
-      console.log("here?");  
-      expect(response.data).toMatchObject(product); //expecting the server to send product back
-      expect(response.data._id).toBeDefined(); // expecting id inside of response data
+    expect(response.data).toMatchObject(product); //expecting the server to send product back
+    expect(response.data._id).toBeDefined(); // expecting id inside of response data
 
-      const dbProduct = await Product.findById(response.data._id);
-      expect(dbProduct).toMatchObject(product); //expecting to find product in DB
-      if (!dbProduct) throw new Error("Product not in DB.");
-      expect(dbProduct.images).toHaveLength(2);
+    const dbProduct = await Product.findById(response.data._id);
+    expect(dbProduct).toMatchObject(product); //expecting to find product in DB
+    if (!dbProduct) throw new Error("Product not in DB.");
+    expect(dbProduct.images).toHaveLength(2);
 
-      //Get the image from the URL and expect it to be the same
-      const downloadedImage1 = (
-        await axios.get(dbProduct.images[0], { responseType: "arraybuffer" })
-      ).data;
-      expect(
-        Buffer.from(await image1.arrayBuffer()).equals(
-          Buffer.from(downloadedImage1)
-        )
-      ).toBe(true);
+    //Get the image from the URL and expect it to be the same
+    const downloadedImage1 = (
+      await axios.get(dbProduct.images[0], { responseType: "arraybuffer" })
+    ).data;
+    expect(image1.equals(Buffer.from(downloadedImage1))).toBe(true);
 
-      const downloadedImage2 = (
-        await axios.get(dbProduct.images[1], { responseType: "arraybuffer" })
-      ).data;
-      expect(
-        Buffer.from(await image1.arrayBuffer()).equals(
-          Buffer.from(downloadedImage1)
-        )
-      ).toBe(true);
-    } catch (error) {
-      console.log(error);
-    }
+    const downloadedImage2 = (
+      await axios.get(dbProduct.images[1], { responseType: "arraybuffer" })
+    ).data;
+    expect(image2.equals(Buffer.from(downloadedImage2))).toBe(true);
   });
 });
