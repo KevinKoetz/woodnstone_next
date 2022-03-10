@@ -47,6 +47,6 @@
     ]
   },
   "dependencies": {
-    "admin": "file:admin" 
+    "admin": "file:admin"
   }
 }
