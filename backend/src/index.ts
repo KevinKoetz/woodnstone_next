@@ -4,6 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 import api from "./api";
 import passport from "passport";
+import cors from "cors";
 
 if (!process.env.MONGO_DB) throw new Error("env: MONGO_DB not defined.");
 mongoose
@@ -17,6 +18,7 @@ mongoose
 const PORT = process.env.PORT || 4000;
 const app = express();
 
+app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
