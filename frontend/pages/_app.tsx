@@ -27,7 +27,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
     try {
       const response = await axios.post(
-        "/product",
+        "http://localhost:4000/product",
         formdata,
         config
       );
@@ -41,7 +41,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   };
   return (
     <form onSubmit={handleSubmit}>
-      <input type="file" />
+      <input type="file" name="images" />
       <input type="submit" />
     </form>
   );
