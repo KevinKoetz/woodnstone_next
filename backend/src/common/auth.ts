@@ -1,5 +1,5 @@
 import { BasicStrategy } from "passport-http";
-import User from "../models/user";
+import User from "../models/User";
 
 export const basicStrategy = new BasicStrategy(async (email, password, done) => {
   try {

@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import { basicStrategy } from "../common/auth";
 import jwt from "jsonwebtoken";
-import User from "../models/user";
+import User from "../models/User";
 
 passport.use(basicStrategy);
 
