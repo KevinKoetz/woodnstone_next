@@ -1,4 +1,3 @@
-import * as React from "react";
 import { AppBar} from "@mui/material";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -10,6 +9,7 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate,  Outlet } from "react-router-dom";
 import { useAuth } from "../Auth/Auth";
@@ -17,7 +17,7 @@ import { useAuth } from "../Auth/Auth";
 const drawerWidth = 240;
 
 export default function Layout() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const {signOut} = useAuth()
 
   const handleDrawerToggle = () => {
@@ -25,34 +25,38 @@ export default function Layout() {
   };
 
   const navigate = useNavigate();
+
+  const [header, setHeader] = useState('Orders')
+  
+  
   const drawer = (
     <div>
       <Toolbar />
 
       <List>
-        <ListItem button onClick={() => navigate("/")}>
+        <ListItem button onClick={() =>{ setMobileOpen(!mobileOpen); navigate("/"); setHeader('Orders')}}>
           <ListItemText primary="Orders" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/products")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen) ;navigate("/products"); setHeader('Poducts')}}>
           <ListItemText primary="Products" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/references")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/references"); setHeader('References')}}>
           <ListItemText primary="References" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/pages")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/pages"); setHeader('Pages')} }>
           <ListItemText primary="Pages" />
         </ListItem>
 
-        <ListItem button onClick={() => navigate("/users")}>
+        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/users"); setHeader('Users')}}>
           <ListItemText primary="Users" />
         </ListItem>
       </List>
     </div>
   );
-
+ 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -73,8 +77,8 @@ export default function Layout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
-            Responsive drawer
+          <Typography variant="h6" noWrap component="div">
+            {header}
           </Typography>
           <IconButton onClick={signOut} color="inherit" edge="end" aria-label="logout">
             <LogoutIcon/>

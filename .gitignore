@@ -3,4 +3,5 @@ node_modules
 .next
 build
 coverage
+upload
 .vscode
