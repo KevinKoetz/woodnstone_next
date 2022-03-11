@@ -45,8 +45,5 @@
       ".next",
       "build"
     ]
-  },
-  "dependencies": {
-    "admin": "file:admin"
   }
 }
