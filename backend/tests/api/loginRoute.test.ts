@@ -1,11 +1,11 @@
 import express, { Express } from "express";
-import loginRoute from "./login";
+import loginRoute from "../../src/api/loginRoute";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Server } from "http";
 import axios from "axios";
 import { AddressInfo } from "net";
-import User from "../models/user";
+import User from "../../src/models/User";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 

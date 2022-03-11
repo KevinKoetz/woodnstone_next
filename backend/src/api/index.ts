@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from "express"
-import loginRoute from "./login"
-import productRoute from "./product"
+import loginRoute from "./loginRoute"
+import productRoute from "./productRoute"
 
 
 

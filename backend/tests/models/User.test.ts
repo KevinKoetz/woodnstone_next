@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "./user";
+import User from "../../src/models/User";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { performance } from "perf_hooks";
 
