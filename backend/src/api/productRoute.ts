@@ -82,7 +82,14 @@ productRoute.delete("/:id", async (req, res) => {
 });
 
 productRoute.patch("/:id", async (req, res) => {
+  try {
+    const _id = req.params.id
+    const updateProduct = await Product.findByIdAndUpdate(_id, req.body)
+    res.send(updateProduct)
+  } catch (error) {
+    res.status(404).send(error)
 
+  }
 
 
 });
