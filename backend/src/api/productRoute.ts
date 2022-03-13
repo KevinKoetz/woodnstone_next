@@ -64,22 +64,37 @@ productRoute.get("/:id", async (req, res) => {
 });
 
 productRoute.delete("/:id", async (req, res) => {
- await Product.remove({ _id: req.params.id })
- //when successfull:
-  .then(result=>{
-    res.status(200).json({
-      message:'product deleted successfully',
-      result:result
+  await Product.remove({ _id: req.params.id })
+    //when successfull:
+    .then(result => {
+      res.status(200).json({
+        message: 'product deleted successfully',
+        result: result
+      })
     })
-  })
-  //when failed:
-  .catch(err=>{
-    res.status(500).json({
-      message:('something went wrong'),
-      error:err 
+    //when failed:
+    .catch(err => {
+      res.status(500).json({
+        message: ('something went wrong'),
+        error: err
+      })
     })
-  })
 });
 
-productRoute.patch("/:id", (req, res) => {});
+productRoute.patch("/:id", async (req, res) => {
+  try {
+    const _id = req.params.id
+    const updateProduct = await Product.findByIdAndUpdate(_id, req.body)
+    res.send(updateProduct)
+  } catch (error) {
+    res.status(404).send(updateProduct)
+
+  }
+
+
+});
 export default productRoute;
+function updateProduct(updateProduct: any) {
+  throw new Error("Function not implemented.");
+}
+
