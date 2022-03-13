@@ -88,7 +88,6 @@ productRoute.patch("/:id", async (req, res) => {
     res.send(updateProduct)
   } catch (error) {
     res.status(404).send(error)
-
   }
 
 
