@@ -29,8 +29,9 @@ const upload = multer({
 
 const productRoute = express.Router();
 productRoute.post("/", upload.array("images"), async (req, res) => {
-  if (!req.files) return res.status(500).send("Files not defined.")
-  if (!Array.isArray(req.files)) return res.status(500).send("Expecting Files to be an Array")
+  if (!req.files) return res.status(500).send("Files not defined.");
+  if (!Array.isArray(req.files))
+    return res.status(500).send("Expecting Files to be an Array");
   try {
     const product = new Product({
       ...req.body,
@@ -53,17 +54,32 @@ productRoute.get("/", async (req, res) => {
 
 productRoute.get("/:id", async (req, res) => {
   // receiving id from client url
-  const id = req.params.id
-  //  searches for product with specific id in MongoDB                      
-  const product = await Product.findById(id).exec()
+  const id = req.params.id;
+  //  searches for product with specific id in MongoDB
+  const product = await Product.findById(id).exec();
   // if it does not find product with right id, it returns 404 not found
-  if (!product) return res.sendStatus(404)
-  // sending back product to client           
-  res.json(product)
+  if (!product) return res.sendStatus(404);
+  // sending back product to client
+  res.json(product);
 });
 
+productRoute.delete("/:id", async (req, res) => {
+ await Product.remove({ _id: req.params.id })
+ //when successfull:
+  .then(result=>{
+    res.status(200).json({
+      message:'product deleted successfully',
+      result:result
+    })
+  })
+  //when failed:
+  .catch(err=>{
+    res.status(500).json({
+      message:('something went wrong'),
+      error:err 
+    })
+  })
+});
 
-
-productRoute.patch("/:id", (req, res) => { });
-productRoute.delete("/:id", (req, res) => { });
+productRoute.patch("/:id", (req, res) => {});
 export default productRoute;
