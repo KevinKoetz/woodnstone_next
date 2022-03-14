@@ -12,7 +12,7 @@ function App() {
       <UserContextProvider>
         <Routes>
           <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
-            <Route index element={<RequireAuth><div>Orders</div></RequireAuth>} />
+            <Route path="orders" element={<RequireAuth><div>Orders</div></RequireAuth>} />
             <Route path="products" element={<RequireAuth><div>Products</div></RequireAuth>} />
             <Route path="references" element={<RequireAuth><div>References</div></RequireAuth>} />
             <Route path="pages" element={<RequireAuth><div> Pages </div></RequireAuth>} />
