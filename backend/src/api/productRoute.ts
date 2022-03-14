@@ -63,8 +63,8 @@ productRoute.get("/:id", async (req, res) => {
   res.json(product);
 });
 
-productRoute.delete("/:id", async (req, res) => {
-  await Product.remove({ _id: req.params.id })
+productRoute.delete("/:id", (req, res) => {
+  Product.remove({ _id: req.params.id })
     //when successfull:
     .then(result => {
       res.status(200).json({
@@ -82,18 +82,18 @@ productRoute.delete("/:id", async (req, res) => {
 });
 
 productRoute.patch("/:id", async (req, res) => {
-  try {
+  /* try {
     const _id = req.params.id
     const updateProduct = await Product.findByIdAndUpdate(_id, req.body)
     res.send(updateProduct)
   } catch (error) {
-    res.status(404).send(error)
-  }
+    res.status(500).send(error)
+  } */
+
+res.sendStatus(500)
 
 
 });
 export default productRoute;
-function updateProduct(updateProduct: any) {
-  throw new Error("Function not implemented.");
-}
+
 
