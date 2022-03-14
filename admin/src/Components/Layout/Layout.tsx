@@ -1,4 +1,4 @@
-import { AppBar} from "@mui/material";
+import { AppBar } from "@mui/material";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Drawer from "@mui/material/Drawer";
@@ -9,16 +9,16 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
-import LogoutIcon from '@mui/icons-material/Logout';
-import { useNavigate,  Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../Auth/Auth";
 
 const drawerWidth = 240;
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const {signOut} = useAuth()
+  const { signOut } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -26,37 +26,82 @@ export default function Layout() {
 
   const navigate = useNavigate();
 
-  const [header, setHeader] = useState('Orders')
-  
+  const [header, setHeader] = useState("Orders");
+
+  const location = useLocation();
+
+  const toCapitalize = (string: string) => {
+    return string.length > 0 ? string[0].toUpperCase() + string.slice(1) : "";
+  };
+
+  useEffect(() =>{
+    if (location.pathname === "/")
+    navigate("/orders")
+  },[location.pathname])
   
   const drawer = (
     <div>
       <Toolbar />
 
       <List>
-        <ListItem button onClick={() =>{ setMobileOpen(!mobileOpen); navigate("/"); setHeader('Orders')}}>
+        <ListItem
+          button
+          onClick={() => {
+            setMobileOpen(!mobileOpen);
+            navigate("/orders");
+            setHeader("Orders");
+          }}
+        >
           <ListItemText primary="Orders" />
         </ListItem>
 
-        <ListItem button onClick={() => {setMobileOpen(!mobileOpen) ;navigate("/products"); setHeader('Poducts')}}>
+        <ListItem
+          button
+          onClick={() => {
+            setMobileOpen(!mobileOpen);
+            navigate("/products");
+            setHeader("Poducts");
+          }}
+        >
           <ListItemText primary="Products" />
         </ListItem>
 
-        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/references"); setHeader('References')}}>
+        <ListItem
+          button
+          onClick={() => {
+            setMobileOpen(!mobileOpen);
+            navigate("/references");
+            setHeader("References");
+          }}
+        >
           <ListItemText primary="References" />
         </ListItem>
 
-        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/pages"); setHeader('Pages')} }>
+        <ListItem
+          button
+          onClick={() => {
+            setMobileOpen(!mobileOpen);
+            navigate("/pages");
+            setHeader("Pages");
+          }}
+        >
           <ListItemText primary="Pages" />
         </ListItem>
 
-        <ListItem button onClick={() => {setMobileOpen(!mobileOpen); navigate("/users"); setHeader('Users')}}>
+        <ListItem
+          button
+          onClick={() => {
+            setMobileOpen(!mobileOpen);
+            navigate("/users");
+            setHeader("Users");
+          }}
+        >
           <ListItemText primary="Users" />
         </ListItem>
       </List>
     </div>
   );
- 
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -78,10 +123,15 @@ export default function Layout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            {header}
+            {toCapitalize(location.pathname.replace("/", ""))}
           </Typography>
-          <IconButton onClick={signOut} color="inherit" edge="end" aria-label="logout">
-            <LogoutIcon/>
+          <IconButton
+            onClick={signOut}
+            color="inherit"
+            edge="end"
+            aria-label="logout"
+          >
+            <LogoutIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -133,7 +183,7 @@ export default function Layout() {
       >
         <Toolbar />
 
-      <Outlet />
+        <Outlet />
       </Box>
     </Box>
   );
