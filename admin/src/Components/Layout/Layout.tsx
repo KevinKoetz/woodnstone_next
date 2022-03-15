@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../Auth/Auth";
-import FixedContainer from "./PageLayout";
+import FixedContainer from "../Products/ProductDetails/PageDetails";
 import Products from "../Products/Products";
 
 const drawerWidth = 240;
@@ -36,11 +36,10 @@ export default function Layout() {
     return string.length > 0 ? string[0].toUpperCase() + string.slice(1) : "";
   };
 
-  useEffect(() =>{
-    if (location.pathname === "/")
-    navigate("/orders")
-  },[location.pathname])
-  
+  useEffect(() => {
+    if (location.pathname === "/") navigate("/orders");
+  }, [location.pathname]);
+
   const drawer = (
     <div>
       <Toolbar />
@@ -184,10 +183,8 @@ export default function Layout() {
         }}
       >
         <Toolbar />
-          <Products /> 
-          
+
         <Outlet />
-        
       </Box>
     </Box>
   );
