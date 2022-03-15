@@ -1,4 +1,4 @@
-import PageLayout from "../Layout/PageLayout"
+import PageLayout from "./ProductDetails/PageDetails"
 import ProductOverview from "./ProductOverview/ProductOverview"
 
 
