@@ -19,7 +19,7 @@ interface Token {
 }
 
 interface Product {
-  _id: Types.ObjectId;
+  _id: string;
   name: string; //unique
   description: string;
   startingPrice: number; //Prices to be stored in euro-cents (no comma values)

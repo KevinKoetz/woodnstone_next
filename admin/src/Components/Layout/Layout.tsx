@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../Auth/Auth";
-import FixedContainer from "../Products/ProductDetails/PageDetails";
 import Products from "../Products/Products";
 
 const drawerWidth = 240;

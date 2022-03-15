@@ -1,20 +1,36 @@
 import { DataGrid, GridRowsProp, GridColDef } from "@mui/x-data-grid";
+import { useState } from "react";
 
-const rows: GridRowsProp = [
-  { id: 1, col1: "Hello", col2: "World" },
-  { id: 2, col1: "DataGridPro", col2: "is Awesome" },
-  { id: 3, col1: "MUI", col2: "is Amazing" },
-];
+interface ProductOverview {
+  headers: string[]
+  items: {_id:string, [key: string]: any}[]
+}
 
-const columns: GridColDef[] = [
-  { field: "col1", headerName: "Column 1", width: 150 },
-  { field: "col2", headerName: "Column 2", width: 150 },
-];
-
-
-
-
-function ProductOveriew() {
+function ProductOveriew({headers, items}: ProductOverview) {
+ 
+  const rows: GridRowsProp = items.map(item => {
+    return {...item,id: item._id}
+  });
+  
+  
+  /* [
+    { id: 1, col1: "placeholder", col2: "placeholder", col3:"placeholder",col4:"placeholder", col5:"placeholder" },
+  
+  ]; */
+  
+  const columns: GridColDef[] = headers.map(header => {
+    return {field: header, headerName: header, width: 150 }
+  })
+  
+  
+ /*  [
+    { field: "col1", headerName: "Name", width: 150 },
+    { field: "col2", headerName: "Description", width: 150 },
+    { field: "col3", headerName: "Starting price", width: 150 },
+    { field: "col4", headerName: "Stock", width: 150 },
+    { field: "col5", headerName: "Max order amount", width: 150 },
+    
+  ]; */
   return (
     <div style={{ height: 300, width: "100%" }}>
       <DataGrid rows={rows} columns={columns} />
@@ -22,4 +38,4 @@ function ProductOveriew() {
   );
 }
 
-export default ProductOveriew
+export default ProductOveriew;
