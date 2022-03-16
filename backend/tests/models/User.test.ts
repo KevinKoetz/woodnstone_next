@@ -38,8 +38,8 @@ describe("User Model should", () => {
       const user = await new User({
         email: "kevin@example.com",
         role: "root",
+        password: "123456"
       });
-      await user.setPassword("1234");
       await user.validate();
     } catch (error: any) {
       err = error;
@@ -54,9 +54,9 @@ describe("User Model should", () => {
       const user = await new User({
         email: "kevin@example.com",
         role: "root",
+        password: "123456"
       });
       id = user._id;
-      await user.setPassword("1234");
       await user.save();
     } catch (error: any) {
       err = error;
@@ -78,15 +78,15 @@ describe("User Model should check uniqueness for", () => {
       const user1 = await new User({
         email: "kevin@example.com",
         role: "root",
+        password: "123456"
       });
-      await user1.setPassword("1234");
       await user1.save();
 
       const user2 = await new User({
         email: "kevin@example.com",
         role: "root",
+        password: "123456"
       });
-      await user2.setPassword("1234");
       await user2.save();
     } catch (error: any) {
       err = error;
@@ -98,7 +98,7 @@ describe("User Model should check uniqueness for", () => {
 });
 
 describe("User Model should require a", () => {
-  test("password.hash", async () => {
+  test("password", async () => {
     let err;
     try {
       await User.validate({});
@@ -106,18 +106,7 @@ describe("User Model should require a", () => {
       err = error;
     }
     expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
-    expect(Object.keys(err.errors)).toContain("password.hash");
-  });
-
-  test("password.salt", async () => {
-    let err;
-    try {
-      await User.validate({});
-    } catch (error: any) {
-      err = error;
-    }
-    expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
-    expect(Object.keys(err.errors)).toContain("password.salt");
+    expect(Object.keys(err.errors)).toContain("password");
   });
 
   test("email", async () => {
@@ -150,8 +139,8 @@ describe("User Models role should accept a", () => {
       const user = new User({
         email: "kevin.koetz@example.com",
         role: "root",
+        password: "123456"
       });
-      await user.setPassword("1234");
       await user.validate();
     } catch (error: any) {
       err = error;
@@ -165,8 +154,8 @@ describe("User Models role should accept a", () => {
       const user = new User({
         email: "kevin.koetz@example.com",
         role: "admin",
+        password: "123456"
       });
-      await user.setPassword("1234");
       await user.validate();
     } catch (error: any) {
       err = error;
@@ -180,8 +169,8 @@ describe("User Models role should accept a", () => {
       const user = new User({
         email: "kevin.koetz@example.com",
         role: "customer",
+        password: "123456"
       });
-      await user.setPassword("1234");
       await user.validate();
     } catch (error: any) {
       err = error;
@@ -195,8 +184,8 @@ describe("User Models role should accept a", () => {
       const user = new User({
         email: "kevin.koetz@example.com",
         role: (Math.random() * 9999).toString(),
+        password: "123456"
       });
-      await user.setPassword("1234");
       await user.validate();
     } catch (error: any) {
       err = error;
@@ -211,18 +200,12 @@ describe("User Model should secure the password by", () => {
     return User.verifyPassword(email, password);
   }
 
-  test("having a instance Method to set the password", () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    expect(user.setPassword).toBeInstanceOf(Function);
-  });
-
   test("having a static Method to verify the password", () => {
     expect((User as any).verifyPassword).toBeInstanceOf(Function);
   });
 
   test("making sure that the verify password API takes the same time no matter if the user exists or not", async () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root" , password: "123456"});
     await user.save();
 
     const startAvailable = performance.now();
@@ -254,51 +237,41 @@ describe("User Model should secure the password by", () => {
   });
 
   test("storing it hashed", async () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("1234");
-    const password = (user as any).password;
-    expect(password).not.toBe("1234");
-    expect(password.toString()).not.toBe("1234");
-    expect(password).toBeInstanceOf(Object);
-    expect(password.salt).toBeInstanceOf(Buffer);
-    expect(password.hash).toBeInstanceOf(Buffer);
-    expect(password.salt.toString()).not.toBe("1234");
-    expect(password.hash.toString()).not.toBe("1234");
+    const user = new User({ email: "kevin@example.com", role: "root" , password: "123456"});
+    await user.save()
+    const dbUser = await User.findById(user._id).select("+password")
+    expect((dbUser as any).password).not.toBe("123456");
   });
 
   test("using a 16 byte salt and 64 byte hash", async () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("1234");
-    const password = (user as any).password;
-    const { salt, hash } = password;
-    expect(salt.length).toBe(16);
-    expect(hash.length).toBe(64);
+    const user = new User({ email: "kevin@example.com", role: "root" , password: "123456"});
+    await user.save()
+    const dbUser = await User.findById(user._id).select("+password")
+    const  [ salt, hash ] = (dbUser as any).password.split(":");
+    expect(Buffer.from(salt, "base64").length).toBe(16);
+    expect(Buffer.from(hash, "base64").length).toBe(64);
   });
 
   test("letting the verify function return the User without the password key for correct passwords", async () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("1234");
+    const user = new User({ email: "kevin@example.com", role: "root" , password: "123456"});
     await user.save()
-    const verifiedUser = await User.verifyPassword("kevin@example.com","1234")
+    const verifiedUser = await User.verifyPassword("kevin@example.com","123456")
     expect(verifiedUser).toMatchObject({email: "kevin@example.com", role: "root"})
     expect((verifiedUser as any).password).toBe(undefined)
     
   });
 
   test("letting the verify function return null for incorrect passwords", async () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("1234");
+    const user = new User({ email: "kevin@example.com", role: "root" , password: "123456"});
     await user.save()
     expect(await User.verifyPassword("kevin@example.com","password")).toBe(null);
   });
 
   test("not selecting it when user is querried", async () => {
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("1234");
+    const user = new User({ email: "kevin@example.com", role: "root" , password: "123456"});
     await user.save();
     const userFromDb = await User.find().byEmail("kevin@example.com").exec();
-    expect((userFromDb as any).password.hash).toBe(undefined);
-    expect((userFromDb as any).password.salt).toBe(undefined);
+    expect((userFromDb as any).password).toBe(undefined);
   });
 });
 
