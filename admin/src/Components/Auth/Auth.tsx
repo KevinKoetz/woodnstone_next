@@ -1,28 +1,34 @@
 import { createContext, useEffect, useState, useContext } from "react";
-import { Token } from "../../../../types";
+import { Token, User } from "../../../../types";
 import jwt_decode from "jwt-decode";
 
 const Context = createContext<{
-  user: Token | null;
-  signIn: (username: string, password: string) => Promise<Token | null>;
+  user: Omit<User, "password"> | null;
+  token: string | null;
+  signIn: (username: string, password: string) => Promise<Omit<User, "password"> | null>;
   signOut: () => void;
-}>({ user: null, signIn: async () => null, signOut: () => {} });
+}>({ user: null, token: null, signIn: async () => null, signOut: () => {} });
 
 export const useAuth = () => useContext(Context);
 
 export function Provider({ children }: { children: JSX.Element }) {
-  const [token, setToken] = useState<Token | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<Omit<User, "password"> | null>(null);
 
   //Store the token in SessionStorage to persist between page reloads
   useEffect(() => {
-    if (!token) return sessionStorage.removeItem("token");
-    sessionStorage.setItem("token", JSON.stringify(token));
-
+    if (!token) return;
+    sessionStorage.setItem("token", token);
+    const payload = jwt_decode(token)
+    if (!isToken(payload))
+      throw new Error("Received unexpected Token from sessionStorage.");
+    setUser(payload)
     //Clear the token when it expires
     const timeout = setTimeout(() => {
       setToken(null);
+      setUser(null);
       sessionStorage.removeItem("token");
-    }, (token.exp - token.iat) * 1000);
+    }, (payload.exp - payload.iat) * 1000);
     return () => {
       clearTimeout(timeout);
     };
@@ -30,12 +36,12 @@ export function Provider({ children }: { children: JSX.Element }) {
 
   //Load the token from SessionStorage
   useEffect(() => {
-    let token: Token | string | null = sessionStorage.getItem("token");
+    let token: string | null = sessionStorage.getItem("token");
     if (!token) return;
-    token = JSON.parse(token);
-    if (!isToken(token))
+    if (!isToken(jwt_decode(token)))
       throw new Error("Received unexpected Token from sessionStorage.");
     setToken(token);
+    setUser(jwt_decode(token));
   }, []);
 
   const signIn = async (username: string, password: string) => {
@@ -48,10 +54,9 @@ export function Provider({ children }: { children: JSX.Element }) {
       if (response.status !== 200) return null;
       const data = await response.text();
       const token = jwt_decode(data)
-      console.log(token);
       if (!isToken(token))
         throw new Error("Received unexpected Token from /login route.");
-      setToken(token);
+      setToken(data);
       return token;
     } catch (error) {
       return null;
@@ -60,12 +65,13 @@ export function Provider({ children }: { children: JSX.Element }) {
   };
 
   const signOut = () => {
+    setUser(null);
     setToken(null);
     sessionStorage.removeItem("token");
   };
 
   return (
-    <Context.Provider value={{ user: token, signIn, signOut }}>
+    <Context.Provider value={{ user, token, signIn, signOut }}>
       {children}
     </Context.Provider>
   );
