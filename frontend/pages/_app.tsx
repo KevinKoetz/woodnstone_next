@@ -1,49 +1,29 @@
-import "../styles/globals.css";
-import axios from "axios";
 import type { AppProps } from "next/app";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { useMemo } from "react";
+import Layout from "../components/Layout";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
 
-    const name = (Math.random() * 100).toString();
-    const product = {
-      description: "Holz",
-      name: name,
-      startingPrice: 100,
-      stock: 10,
-      maxOrderAmount: 50,
-    };
-
-    const formdata = new FormData(e.currentTarget);
-
-    Object.entries(product).forEach((entry) => formdata.set(entry[0], typeof entry[1] === "number" ? entry[1].toString() : entry[1]));
-
-    const config = {
-      headers: { "content-type": "mulitpart/form-data" },
-    };
-
-    console.log("Handlesave: formdata is", formdata.keys());
-
-    try {
-      const response = await axios.post(
-        "http://localhost:4000/product",
-        formdata,
-        config
-      );
-    } catch (error) {
-      console.log(error);
-      
-    }
-    
-
-
-  };
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: "light",
+        },
+      }),
+    [prefersDarkMode]
+  );
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="file" name="images" />
-      <input type="submit" />
-    </form>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </ThemeProvider>
   );
 }
 
