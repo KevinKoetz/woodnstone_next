@@ -4,10 +4,7 @@ import type { Types} from "mongoose";
 
 interface User {
   email: string; //unique
-  password: {
-    salt: Buffer,
-    hash: Buffer
-  }; //Buffer because: https://nodejs.org/dist/latest-v16.x/docs/api/crypto.html#using-strings-as-inputs-to-cryptographic-apis
+  password: string;
   role: Role;
 }
 

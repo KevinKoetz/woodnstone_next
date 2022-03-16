@@ -1,13 +1,24 @@
-import express from "express";
+import express, { Request } from "express";
 import { verifyAuthToken } from "../common/auth";
 import User from "../models/User";
 import { Error } from "mongoose";
+import multer from "multer";
+
+interface IUser {
+  email: string;
+  role: string;
+  iat: number;
+  exp: number;
+}
+interface RequestWithUser extends Request {
+  user?: IUser;
+}
 
 const userRoute = express.Router();
 
 userRoute.use(verifyAuthToken);
 
-userRoute.use((req, res, next) => {
+userRoute.use((req: any, res, next) => {
   if (!req.user) return res.sendStatus(401);
   if (req.user.role !== "root" && req.user.role !== "admin")
     return res.sendStatus(401);
@@ -16,12 +27,10 @@ userRoute.use((req, res, next) => {
 
 userRoute.use(express.json());
 
-userRoute.post("/", async (req, res) => {
+userRoute.post("/", multer().none(), async (req, res) => {
   if (!req.body) return res.sendStatus(400);
   try {
-    const newUser = new User({ email: req.body.email, role: req.body.role });
-    if(!req.body.password) return res.sendStatus(400);
-    await newUser.setPassword(req.body.password);
+    const newUser = new User(req.body);
     await newUser.save();
 
     return res.json(
@@ -47,13 +56,13 @@ userRoute.get("/:id", async (req, res) => {
   res.send(user.toJSON());
 });
 
-userRoute.patch("/:id", async (req, res) => {
+userRoute.patch("/:id", multer().none(), async (req, res) => {
   try {
     const user = await User.findById(req.params.id).exec();
     if (!user) return res.sendStatus(404);
     if (req.body.email) user.email = req.body.email;
     if (req.body.role) user.role = req.body.role;
-    if (req.body.password) await user.setPassword(req.body.password);
+    if (req.body.password) (user as any).password = req.body.password;
     await user.save();
     return res.send(user.toJSON());
   } catch (error) {

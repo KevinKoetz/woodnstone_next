@@ -80,8 +80,7 @@ describe("User Route should", () => {
     //Create some Users
     const emails: string[] = [];
     for (let i = 0; i < 10; i++) {
-      const user = new User({ email: `kevin${i}@example.com`, role: "root" });
-      await user.setPassword("123456");
+      const user = new User({ email: `kevin${i}@example.com`, role: "root",password: "123456" });
       await user.save();
       emails.push(user.email)
     }
@@ -103,8 +102,7 @@ describe("User Route should", () => {
   });
 
   test("send back a single user if id was provided in request.", async () => {
-    const dbUser = new User({ email: `kevin@example.com`, role: "root" });
-    await dbUser.setPassword("123456");
+    const dbUser = new User({ email: `kevin@example.com`, role: "root",password: "123456" });
     await dbUser.save();
 
     const user = (
@@ -125,8 +123,7 @@ describe("User Route should", () => {
   });
 
   test("delete the user upon delete request.", async () => {
-    const dbUser = new User({ email: `kevin@example.com`, role: "root" });
-    await dbUser.setPassword("123456");
+    const dbUser = new User({ email: `kevin@example.com`, role: "root",password: "123456" });
     await dbUser.save();
 
     const user = await axios.delete(
@@ -144,8 +141,7 @@ describe("User Route should", () => {
 
 describe("User Route should change the User information upon patch request.", () => {
   test("change only email.", async () => {
-    const dbUser = new User({ email: `kevin@example.com`, role: "root" });
-    await dbUser.setPassword("123456");
+    const dbUser = new User({ email: `kevin@example.com`, role: "root",password: "123456" });
     await dbUser.save();
 
     const user = (
@@ -166,8 +162,7 @@ describe("User Route should change the User information upon patch request.", ()
   });
 
   test("change only password.", async () => {
-    const dbUser = new User({ email: `kevin@example.com`, role: "root" });
-    await dbUser.setPassword("123456");
+    const dbUser = new User({ email: `kevin@example.com`, role: "root",password: "123456" });
     await dbUser.save();
 
     const user = (
@@ -188,8 +183,7 @@ describe("User Route should change the User information upon patch request.", ()
   });
 
   test("change only role.", async () => {
-    const dbUser = new User({ email: `kevin@example.com`, role: "root" });
-    await dbUser.setPassword("123456");
+    const dbUser = new User({ email: `kevin@example.com`, role: "root", password: "123456" });
     await dbUser.save();
 
     const user = (
@@ -210,8 +204,7 @@ describe("User Route should change the User information upon patch request.", ()
   });
 
   test("change everything at once", async () => {
-    const dbUser = new User({ email: `kevin@example.com`, role: "root" });
-    await dbUser.setPassword("123456");
+    const dbUser = new User({ email: `kevin@example.com`, role: "root", password: "123456" });
     await dbUser.save();
 
     const user = (
