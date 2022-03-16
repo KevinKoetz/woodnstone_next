@@ -19,18 +19,14 @@ const scryptOptions = {
 };
 
 const fakeSalt = crypto.randomBytes(keyLength);
-const fakePassword = {
-  salt: fakeSalt,
-  hash: crypto.scryptSync(
-    "PjbEX,4v{jq<7J7V",
-    fakeSalt,
-    hashLength,
-    scryptOptions
-  ),
-};
+const fakePassword = [fakeSalt.toString("base64"), crypto.scryptSync(
+  fakeSalt.toString("base64"),
+  fakeSalt,
+  hashLength,
+  scryptOptions
+).toString("base64")]
 
 interface InstanceMethods {
-  setPassword: (password: string) => Promise<void>;
 }
 
 interface QueryHelpers {
@@ -67,35 +63,45 @@ const userSchema = new Schema<User, UserModel>({
     match:
       /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
     set: toLowerCase,
+    important: true,
+    inputType: "email"
   },
   password: {
-    hash: { type: Buffer, required: true, select: false },
-    salt: { type: Buffer, required: true, select: false },
+    type: String,
+    required: true,
+    select: false,
+    inputType: "password"
   },
   role: {
     type: String,
     required: true,
     enum: ["root", "admin", "customer"],
+    important: true,
+    inputType: "select"
   },
+});
+
+userSchema.pre("save", function (next) {
+  if(this.password){
+    const salt = crypto.randomBytes(keyLength);
+    crypto.scrypt(
+      this.password,
+      salt,
+      hashLength,
+      scryptOptions,
+      (err, derivedKey) => {
+        if (err) throw err;
+        this.password = salt.toString("base64") + ":" + derivedKey.toString("base64");
+        next()
+      }
+    );
+  }else {next()}
+  
 });
 
 userSchema.methods.setPassword = async function (password: string) {
   return new Promise<void>((res, rej) => {
     // generate random 16 bytes long salt
-    const salt = crypto.randomBytes(keyLength);
-
-    crypto.scrypt(
-      password,
-      salt,
-      hashLength,
-      scryptOptions,
-      (err, derivedKey) => {
-        if (err) rej(err);
-        this.password.salt = salt;
-        this.password.hash = derivedKey;
-        res();
-      }
-    );
   });
 };
 
@@ -109,8 +115,10 @@ userSchema.static(
     const user = await model<User, UserModel>("user", userSchema)
       .find()
       .byEmail(email)
-      .select("+password.hash +password.salt");
-    const { salt, hash } = user ? (user as any).password : fakePassword;
+      .select("+password");
+    const [ b64salt, b64hash ] = user ? (user as any).password.split(":") : fakePassword;
+    const salt = Buffer.from(b64salt, "base64")
+    const hash = Buffer.from(b64hash, "base64")
     return new Promise<LeanDocument<
       Document<unknown, any, Omit<User, "password">> &
         Omit<User, "password"> & {
@@ -124,8 +132,8 @@ userSchema.static(
         scryptOptions,
         (err, derivedKey) => {
           const check = derivedKey.equals(hash);
-          if (err) return rej(err)
-          if(!user || !check) return res(null);
+          if (err) return rej(err);
+          if (!user || !check) return res(null);
           const result = user.toObject();
           (result as any).password = undefined;
           res(result);
@@ -139,4 +147,4 @@ function toLowerCase(v: string) {
   return v.toLowerCase();
 }
 
-export default model<User, UserModel>("user", userSchema);
+export default model<User, UserModel>("User", userSchema);
