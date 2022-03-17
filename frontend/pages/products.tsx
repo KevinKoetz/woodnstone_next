@@ -6,6 +6,7 @@ import Carousel from "../components/Carousel";
 import Layout from "../components/Layout";
 import ProductCard, { ProductCardProps } from "../components/ProductCard";
 import axios from "axios";
+import { Box } from "@mui/material";
 
 const products: ProductCardProps[] = [
   {
@@ -23,16 +24,12 @@ const products: ProductCardProps[] = [
 const Products: NextPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   useEffect(() => {
-    const fetchProduct= async () => {
+    const fetchProduct = async () => {
       const products = (await axios.get("http://localhost:4000/product")).data;
       setProducts(products);
     };
-    fetchProduct()
+    fetchProduct();
   }, []);
-
-  
-  
-
 
   return (
     <div>
@@ -69,9 +66,24 @@ const Products: NextPage = () => {
         />
       </Carousel>
 
-      {products.map((ProductProps) => (
-        <ProductCard {...ProductProps} price={ProductProps.startingPrice} />
-      ))}
+      <Box
+        sx={{
+          marginBottom:"3rem",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "1rem",
+          justifyContent: "center",
+          marginTop:"1rem"
+        }}
+      >
+        {products.map((ProductProps) => (
+          <ProductCard
+            key={ProductProps._id}
+            {...ProductProps}
+            price={ProductProps.startingPrice}
+          />
+        ))}
+      </Box>
     </div>
   );
 };

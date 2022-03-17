@@ -17,9 +17,10 @@ interface ProductDetailsProps {
   }[];
   onSave: (data: FormData) => void;
   onDelete: (id: string) => void;
+  onCancel: () => void;
 }
 
-function DocumentDetails({ data, onSave, paths, onDelete }: ProductDetailsProps) {
+function DocumentDetails({ data, onSave, paths, onDelete, onCancel }: ProductDetailsProps) {
   const [changedDocument, setChangedDocument] = useState(data);
   useEffect(() => setChangedDocument(data), [data]);
 
@@ -137,7 +138,7 @@ function DocumentDetails({ data, onSave, paths, onDelete }: ProductDetailsProps)
           }
         )}
         <Button type="submit">Save</Button>
-        <Button onClick={() => setChangedDocument(data)}>Cancel</Button>
+        <Button onClick={() => onCancel()}>Cancel</Button>
         <Button disabled={data._id ? false : true} variant="contained" color="error" onClick={() => onDelete(data._id)}>Delete</Button>
       </form>
     </Paper>

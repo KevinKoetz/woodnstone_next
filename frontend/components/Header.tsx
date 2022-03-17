@@ -19,7 +19,7 @@ interface HeaderProps {
 
 const Header = ({ pages }: HeaderProps) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState<number>(0)
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
   const ref: RefObject<HTMLDivElement> = useRef(null);
 
   const toggleNavMenu = () => {
@@ -27,15 +27,15 @@ const Header = ({ pages }: HeaderProps) => {
   };
 
   useLayoutEffect(() => {
-    if(ref.current) setHeaderHeight(ref.current.clientHeight)
-  }, [ref])
+    if (ref.current) setHeaderHeight(ref.current.clientHeight);
+  }, [ref]);
 
   return (
     <AppBar
       position="sticky"
       sx={{
         background: "transparent",
-        position: "relative",
+
         "&:before": {
           content: '""',
           display: "block",
@@ -117,7 +117,11 @@ const Header = ({ pages }: HeaderProps) => {
               }}
             >
               {pages.map((page) => (
-                <Link key={page} href={`/${page.toLowerCase()}`} passHref={true}>
+                <Link
+                  key={page}
+                  href={`/${page.toLowerCase()}`}
+                  passHref={true}
+                >
                   <Button
                     sx={{
                       color: "white",

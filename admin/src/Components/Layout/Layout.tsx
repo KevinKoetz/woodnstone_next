@@ -47,7 +47,7 @@ export default function Layout({ pages }: LayoutProps) {
       <List>
         {pages.map((page) => (
           <ListItem
-          key={page}
+            key={page}
             button
             onClick={() => {
               setMobileOpen(!mobileOpen);
@@ -71,7 +71,7 @@ export default function Layout({ pages }: LayoutProps) {
           ml: { md: `${drawerWidth}px` },
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{display:"flex", justifyContent:"space-between"}} >
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -85,12 +85,16 @@ export default function Layout({ pages }: LayoutProps) {
             {toCapitalize(location.pathname.replace("/", ""))}
           </Typography>
           <IconButton
+            
             onClick={signOut}
             color="inherit"
             edge="end"
             aria-label="logout"
           >
             <LogoutIcon />
+            <Typography style={{ marginLeft: "0.3rem" }} variant="h6">
+              Logout
+            </Typography>
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -121,7 +125,7 @@ export default function Layout({ pages }: LayoutProps) {
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: "none", md:"block" },
+            display: { xs: "none", md: "block" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,

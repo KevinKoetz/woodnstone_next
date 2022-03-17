@@ -81,16 +81,27 @@ productRoute.delete("/:id", (req, res) => {
     })
 });
 
-productRoute.patch("/:id", async (req, res) => {
-  /* try {
-    const _id = req.params.id
-    const updateProduct = await Product.findByIdAndUpdate(_id, req.body)
-    res.send(updateProduct)
-  } catch (error) {
-    res.status(500).send(error)
-  } */
+productRoute.patch("/:id", upload.array("images"), async (req, res) => {
+  
+    if (!req.files) return res.status(500).send("Files not defined.");
+    if (!Array.isArray(req.files))
+      return res.status(500).send("Expecting Files to be an Array");
+    try {
+      const product = await Product.findByIdAndUpdate(req.params.id, {
+        ...req.body,
+        images: req.files.map((file) => file.path),
+      }, {returnDocument:"after"}); // creating new instance of class Product
+      if(!product) return res.sendStatus(404)
+      await product.save(); // has been created and saved after calling save()
+      /* res.setHeader('Content-Type', 'application/json') */
+      /* res.send(JSON.stringify(product)) */
+      res.json(product);
+    } catch (error: any) {
+      res.status(400);
+      res.send(error.message);
+    }
 
-res.sendStatus(500)
+
 
 
 });
