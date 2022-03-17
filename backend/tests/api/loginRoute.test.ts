@@ -64,8 +64,7 @@ describe("the login route should", () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root", password: "123456" });
     await user.save();
 
     const response = await axios.post(
@@ -83,8 +82,7 @@ describe("the login route should", () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root", password: "123456" });
     await user.save();
 
     const response = await axios.post(
@@ -102,8 +100,7 @@ describe("the login route should", () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root", password: "123456" });
     await user.save();
 
     const response = await axios.post(
@@ -130,8 +127,7 @@ describe("The jwt should", () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root", password: "123456" });
     await user.save();
 
     const response = await axios.post(
@@ -155,8 +151,7 @@ describe("The jwt should", () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root", password: "123456" });
     await user.save();
 
     const response = await axios.post(
@@ -178,8 +173,7 @@ describe("The jwt should", () => {
     const address = server.address() as AddressInfo;
     if (!address) throw new Error("Server should be running!");
 
-    const user = new User({ email: "kevin@example.com", role: "root" });
-    await user.setPassword("123456");
+    const user = new User({ email: "kevin@example.com", role: "root", password: "123456" });
     await user.save();
 
     const response = await axios.post(
