@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../Auth/Auth";
 import { Button } from "@mui/material";
+import { Box } from "@mui/system";
 
 interface CollectionProps {
   schema: {
@@ -45,41 +46,32 @@ function Collection({ schema, endpoint }: CollectionProps) {
   }, [endpoint, token]);
 
   const handleDocumentSave = async (data: FormData) => {
-    const id = data.get("_id")
-    if(id){
-      const response = await axios.patch(
-        endpoint + "/" + id,
-        data,
-        { headers: { Authorization: "Bearer " + token } }
-      );
+    const id = data.get("_id");
+    if (id) {
+      const response = await axios.patch(endpoint + "/" + id, data, {
+        headers: { Authorization: "Bearer " + token },
+      });
       setCollection(
         collection.map((doc) =>
           doc._id === response.data._id ? response.data : doc
         )
-      ); 
-    }else{
-      const response = await axios.post(
-        endpoint,
-        data,
-        { headers: { Authorization: "Bearer " + token } }
       );
-      setCollection([...collection, response.data]); 
-      setData(response.data); 
-    }    
+    } else {
+      const response = await axios.post(endpoint, data, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      setCollection([...collection, response.data]);
+      setData(response.data);
+    }
   };
 
   const handleDeleteDocument = async (id: string) => {
-    axios.delete(
-      endpoint + "/" + id,
-      { headers: { Authorization: "Bearer " + token } }
-    );
-    setData({})
-    setCollection(
-      collection.filter((doc) =>
-        doc._id !== id
-      )
-    ); 
-  }
+    axios.delete(endpoint + "/" + id, {
+      headers: { Authorization: "Bearer " + token },
+    });
+    setData({});
+    setCollection(collection.filter((doc) => doc._id !== id));
+  };
 
   const handleSelectDocument = async (id: string) => {
     setData(collection.find((document) => document._id === id));
@@ -101,7 +93,15 @@ function Collection({ schema, endpoint }: CollectionProps) {
         items={collection}
         onSelectDocument={handleSelectDocument}
       />
-      <Button variant="contained" onClick={() => setData({})}>Add new</Button>
+      <Box sx={{ display: "flex", justifyContent:"flex-end" }}>
+        <Button
+          style={{ marginTop: "2vh", marginBottom:"5vh" }}
+          variant="contained"
+          onClick={() => setData({})}
+        >
+          Add new
+        </Button>
+      </Box>
       <DocumentDetails
         data={data}
         onSave={handleDocumentSave}
