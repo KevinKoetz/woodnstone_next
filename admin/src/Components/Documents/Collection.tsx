@@ -30,6 +30,7 @@ function Collection({ schema, endpoint }: CollectionProps) {
 
   useEffect(() => {
     setData(null);
+    setCollection([]);
   }, [schema]);
 
   useEffect(() => {
