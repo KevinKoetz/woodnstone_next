@@ -5,11 +5,14 @@ import Logo from "./Logo";
 function Footer() {
   return (
     <AppBar
-      position="static"
+      position="fixed"
+
       component="footer"
       sx={{
+        top:"unset",
+        bottom:"0",
         background: "transparent",
-        position: "relative",
+        
         "&:before": {
           content: '""',
           display: "block",

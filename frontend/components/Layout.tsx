@@ -14,14 +14,15 @@ function Layout({ children }: LayoutProps) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        minHeight:"100vh",
         background:
           "url(https://images.unsplash.com/photo-1604411853851-8b4d5d910545?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80)",
-        backgroundSize: "cover",
+        backgroundSize: "con",
+        
       }}
     >
-      <Header pages={pages} />
-      <Container maxWidth="xl" sx={{ flexGrow: 1, overflow: "auto" }}>
+      <Header  pages={pages} />
+      <Container maxWidth="xl" sx={{ flexGrow: 1 }}>
         {children}
       </Container>
       <Footer />

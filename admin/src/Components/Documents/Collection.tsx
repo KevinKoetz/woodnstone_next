@@ -24,16 +24,13 @@ interface CollectionProps {
 }
 
 function Collection({ schema, endpoint }: CollectionProps) {
-  const defaultDocument = useMemo(() => {
-    return {};
-  }, []);
   const { token } = useAuth();
   const [collection, setCollection] = useState<any[]>([]);
-  const [data, setData] = useState(defaultDocument);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    setData(defaultDocument);
-  }, [schema, defaultDocument]);
+    setData(null);
+  }, [schema]);
 
   useEffect(() => {
     const retrieveDocuments = async () => {
@@ -66,6 +63,7 @@ function Collection({ schema, endpoint }: CollectionProps) {
   };
 
   const handleDeleteDocument = async (id: string) => {
+    setData(null);
     axios.delete(endpoint + "/" + id, {
       headers: { Authorization: "Bearer " + token },
     });
@@ -93,23 +91,29 @@ function Collection({ schema, endpoint }: CollectionProps) {
         items={collection}
         onSelectDocument={handleSelectDocument}
       />
-      <Box sx={{ display: "flex", justifyContent:"flex-end" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button
-          style={{ marginTop: "2vh", marginBottom:"5vh" }}
+          style={{ marginTop: "2vh", marginBottom: "5vh" }}
           variant="contained"
           onClick={() => setData({})}
         >
           Add new
         </Button>
       </Box>
-      <DocumentDetails
-        data={data}
-        onSave={handleDocumentSave}
-        onDelete={handleDeleteDocument}
-        paths={Object.entries(schema).map(([key, { type, ...rest }]) => {
-          return { name: key, multiple: Array.isArray(type), ...rest };
-        })}
-      />
+
+      {data ? (
+        <DocumentDetails
+          data={data}
+          onCancel={() => {
+            setData(null);
+          }}
+          onSave={handleDocumentSave}
+          onDelete={handleDeleteDocument}
+          paths={Object.entries(schema).map(([key, { type, ...rest }]) => {
+            return { name: key, multiple: Array.isArray(type), ...rest };
+          })}
+        />
+      ) : null}
     </>
   );
 }
