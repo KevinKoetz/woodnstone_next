@@ -13,6 +13,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       createTheme({
         palette: {
           mode: "light",
+          primary: {
+            light: "#d8bba0",
+            main: "#b07640"}
         },
       }),
     [prefersDarkMode]
