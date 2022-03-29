@@ -12,17 +12,21 @@ import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../Auth/Auth";
+import { useAbility, useAuth } from "../Auth/Auth";
 
 const drawerWidth = 240;
 
 interface LayoutProps {
-  pages: string[];
+  collections: string[];
 }
 
-export default function Layout({ pages }: LayoutProps) {
+export default function Layout({ collections }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { signOut } = useAuth();
+
+  const ability = useAbility();
+  console.log("abilits is:",ability);
+  
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -37,24 +41,25 @@ export default function Layout({ pages }: LayoutProps) {
   };
 
   useEffect(() => {
-    if (location.pathname === "/") navigate(pages[0]);
-  }, [location.pathname, navigate, pages]);
+    if(!location) return;
+    if (location?.pathname === "/" && collections.length !== 0) return navigate(collections[0]);
+  }, [location, navigate, collections]);
 
   const drawer = (
     <div>
       <Toolbar />
 
       <List>
-        {pages.map((page) => (
-          <ListItem
-            key={page}
+        {collections.map((collection) => (
+           <ListItem
+            key={collection}
             button
             onClick={() => {
               setMobileOpen(!mobileOpen);
-              navigate(page);
+              navigate("/" + collection.toLowerCase());
             }}
           >
-            <ListItemText primary={toCapitalize(page.replace("/", ""))} />
+            <ListItemText primary={toCapitalize(collection.replace("/", ""))} />
           </ListItem>
         ))}
       </List>
@@ -82,7 +87,7 @@ export default function Layout({ pages }: LayoutProps) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            {toCapitalize(location.pathname.replace("/", ""))}
+            {toCapitalize(location?.pathname.replace("/", "") ?? "")}
           </Typography>
           <IconButton
             

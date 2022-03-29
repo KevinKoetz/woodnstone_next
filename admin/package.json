@@ -4,6 +4,8 @@
   "private": true,
   "proxy": "http://localhost:4000/",
   "dependencies": {
+    "@casl/ability": "^5.4.3",
+    "@casl/react": "^2.3.0",
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.4.2",

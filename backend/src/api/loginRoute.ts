@@ -1,30 +1,22 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/User";
+import { authenticateBasic, determineUserAbility } from "../middlewares/auth";
+
+const provideToken: RequestHandler = async (req, res) => {
+  if (req.user?.ability?.can("login", "Adminpage")) {
+    if (!process.env.JWT_KEY) throw new Error("env: JWT_KEY missing.");
+    if (!req.user) throw new Error("Can not produce Token for undefined User.");
+    return res.send(jwt.sign({_id: req.user._id, email: req.user.email, role: req.user.role}, process.env.JWT_KEY, { expiresIn: "15m" }));
+  }
+  res.sendStatus(403)
+};
 
 const loginRoute = express.Router();
 loginRoute.post(
   "/",
-  async (req, res, next) => {
-    const authorization = req.headers.authorization;
-    if (!authorization) return res.sendStatus(400);
-
-    const [scheme, credentials] = authorization.split(" ");
-    if (!/Basic/i.test(scheme)) return res.sendStatus(400);
-
-    const [email, password] = Buffer.from(credentials, "base64")
-      .toString()
-      .split(":");
-    if (!email || !password) return res.sendStatus(400);
-    try {
-      const user = await User.verifyPassword(email, password);
-      if (!user) return res.sendStatus(401);
-      if (!process.env.JWT_KEY) throw new Error("env: JWT_KEY missing.");
-      res.send(jwt.sign(user, process.env.JWT_KEY, { expiresIn: "15m" }));
-    } catch (error) {
-      return res.sendStatus(500);
-    }
-  }
+  authenticateBasic({ allowGuestAccess: false }),
+  determineUserAbility,
+  provideToken
 );
 
 export default loginRoute;

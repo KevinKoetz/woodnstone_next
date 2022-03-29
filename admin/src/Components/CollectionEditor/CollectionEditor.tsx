@@ -1,32 +1,50 @@
-import DocumentDetails from "./DocumentDetails/DocumentDetails";
+import DocumentEditor from "../DocumentEditor/DocumentEditor";
 import DocumentsOverview from "./CollectionOverview/CollectionOverview";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../Auth/Auth";
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 
 interface CollectionProps {
-  schema: {
-    [key: string]: {
-      type: string | string[];
-      inputType: string;
-      required?: boolean;
-      unique?: boolean;
-      min?: number;
-      max?: number;
-      minlength?: number;
-      important?: boolean;
-      enum?: string[];
-    };
-  };
+  collectionName: string;
+  schema: Schema;
   endpoint: string;
 }
 
-function Collection({ schema, endpoint }: CollectionProps) {
+type Schema =
+  | {
+      [key: string]: {
+        type: string | string[];
+        inputType: string;
+        required?: boolean;
+        unique?: boolean;
+        min?: number;
+        max?: number;
+        minlength?: number;
+        important?: boolean;
+        enum?: string[];
+      };
+    }
+  | {
+      [key: string]: {
+        type: [Schema] | Schema;
+        inputType: "subdocument";
+        required?: boolean;
+        unique?: boolean;
+        min?: number;
+        max?: number;
+        minlength?: number;
+        important?: boolean;
+        enum?: string[];
+      };
+    };
+
+function Collection({ collectionName, schema, endpoint }: CollectionProps) {
   const { token } = useAuth();
   const [collection, setCollection] = useState<any[]>([]);
   const [data, setData] = useState<any>(null);
+  const [createNew, setCreateNew] = useState(false);
 
   useEffect(() => {
     setData(null);
@@ -64,15 +82,23 @@ function Collection({ schema, endpoint }: CollectionProps) {
   };
 
   const handleDeleteDocument = async (id: string) => {
-    setData(null);
-    axios.delete(endpoint + "/" + id, {
+    const response = await axios.delete(endpoint + "/" + id, {
       headers: { Authorization: "Bearer " + token },
+      validateStatus: () => true,
     });
-    setData({});
-    setCollection(collection.filter((doc) => doc._id !== id));
+
+    switch (response.status) {
+      case 200:
+        setData(null);
+        setCollection(collection.filter((doc) => doc._id !== id));
+        return;
+      case 403:
+        return "forbidden";
+    }
   };
 
   const handleSelectDocument = async (id: string) => {
+    setCreateNew(false);
     setData(collection.find((document) => document._id === id));
     const response = await axios.get(endpoint + "/" + id, {
       headers: { Authorization: "Bearer " + token },
@@ -86,7 +112,7 @@ function Collection({ schema, endpoint }: CollectionProps) {
   };
 
   return (
-    <>
+    <Box>
       <DocumentsOverview
         headers={Object.keys(schema).filter((path) => schema[path].important)}
         items={collection}
@@ -96,26 +122,37 @@ function Collection({ schema, endpoint }: CollectionProps) {
         <Button
           style={{ marginTop: "2vh", marginBottom: "5vh" }}
           variant="contained"
-          onClick={() => setData({})}
+          onClick={() => setCreateNew(true)}
         >
           Add new
         </Button>
       </Box>
 
-      {data ? (
-        <DocumentDetails
-          data={data}
+      {data || createNew ? (
+        <DocumentEditor
+          collectionName={collectionName}
+          data={createNew ? {} : data}
           onCancel={() => {
             setData(null);
+            setCreateNew(false);
           }}
+          isNew={createNew}
           onSave={handleDocumentSave}
           onDelete={handleDeleteDocument}
           paths={Object.entries(schema).map(([key, { type, ...rest }]) => {
-            return { name: key, multiple: Array.isArray(type), ...rest };
+            return {
+              name: key,
+              multiple: Array.isArray(type),
+              subSchema:
+                rest.inputType === "subdocument" && Array.isArray(type)
+                  ? type[0]
+                  : type,
+              ...rest,
+            };
           })}
         />
       ) : null}
-    </>
+    </Box>
   );
 }
 

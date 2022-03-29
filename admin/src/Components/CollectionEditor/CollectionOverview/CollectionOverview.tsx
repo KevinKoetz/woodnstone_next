@@ -18,7 +18,7 @@ function CollectionOverview({headers, items, onSelectDocument}: CollectionOvervi
   
   return (
     <div style={{ height: 300, width: "100%" }}>
-      <DataGrid rows={rows} columns={columns} onRowClick={(a) => onSelectDocument(a.id.toString())}/>
+      <DataGrid density="compact" hideFooter rows={rows} columns={columns} onRowClick={(a) => onSelectDocument(a.id.toString())}/>
     </div>
   );
 }

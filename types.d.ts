@@ -9,6 +9,7 @@ interface User {
 }
 
 interface Token {
+  _id: string,
   email: string,
   role: Role,
   iat: number,
@@ -29,25 +30,28 @@ interface Reference {
   _id: Types.ObjectId;
   name: string; //unique
   description?: string;
-  sections?: Section[];
+  sections?: Reference.Section[];
 }
 
-declare namespace Reference {
-  //Sections are nested Objects on References, no seperate collection
-  interface Section {
-    heading: string;
-    text: string;
-    imgUrl?: string; //we will store the image in aws/azure
-  }
+interface Section {
+  heading: string;
+  text: string;
+  imgUrl?: string; //we will store the image in aws/azure
 }
 
 interface Page {
   _id: Types.ObjectId;
   name: string; //unique
-  variables: { [key: string]: unknown };
+  props: Prop[]
 }
 
-namespace Page {
+interface Prop {
+  name: string;
+  value: string;
+  inputType: "text" | "file" | "number"
+}
+
+/* namespace Page {
   interface About extends Page {
     name: "about";
     variables: {
@@ -57,7 +61,7 @@ namespace Page {
       hobbies: string[];
     };
   }
-}
+} */
 
 interface Order {
   _id: Types.ObjectId;
@@ -78,7 +82,7 @@ interface Address {
   country: string;
 }
 
-type Role = "root" | "admin" | "customer"
+type Role = "root" | "admin" | "customer" | "guest"
 
 type OrderStatus =
   | "new"

@@ -6,6 +6,7 @@ import {
   Query,
   Types,
   LeanDocument,
+  models
 } from "mongoose";
 import crypto from "crypto";
 import { User } from "../../../types";
@@ -99,11 +100,26 @@ userSchema.pre("save", function (next) {
   
 });
 
-userSchema.methods.setPassword = async function (password: string) {
-  return new Promise<void>((res, rej) => {
-    // generate random 16 bytes long salt
-  });
-};
+userSchema.pre(/update/i, function (next) {
+  const update = this.getUpdate()
+  if(update.password){
+    const salt = crypto.randomBytes(keyLength);
+    crypto.scrypt(
+      update.password,
+      salt,
+      hashLength,
+      scryptOptions,
+      (err, derivedKey) => {
+        if (err) throw err;
+        update.password = salt.toString("base64") + ":" + derivedKey.toString("base64");
+        this.setUpdate(update)
+        next()
+      }
+    );
+  }else {next()}
+  
+})
+
 
 userSchema.query.byEmail = function (email: string): QueryHelpers {
   return this.findOne({ email: toLowerCase(email) });
@@ -112,10 +128,9 @@ userSchema.query.byEmail = function (email: string): QueryHelpers {
 userSchema.static(
   "verifyPassword",
   async function verifyPassword(email: string, password: string) {
-    const user = await model<User, UserModel>("user", userSchema)
-      .find()
-      .byEmail(email)
-      .select("+password");
+    const user = await this
+      .findOne({email})
+      .select("+password").exec();
     const [ b64salt, b64hash ] = user ? (user as any).password.split(":") : fakePassword;
     const salt = Buffer.from(b64salt, "base64")
     const hash = Buffer.from(b64hash, "base64")

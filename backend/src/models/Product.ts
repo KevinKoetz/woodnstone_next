@@ -11,7 +11,7 @@ const schema = new Schema<Product>({
     required: true,
     unique: true,
     important: true,
-    inputType: "text",
+    inputType: "text"
   },
   description: { type: String, required: true, inputType: "textarea" },
   startingPrice: {
@@ -39,5 +39,6 @@ const schema = new Schema<Product>({
   },
   images: { type: [String], required: true, minlength: 1, inputType: "file" },
 });
+
 
 export default model("Product", schema);
